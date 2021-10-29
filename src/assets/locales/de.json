@@ -1,0 +1,19 @@
+{
+  "meeting": {
+    "meeting": "Sitzung | Sitzungen",
+    "schedule": "Tagesordnung",
+    "next": "Nächste Sitzung",
+    "upcoming": "Anstehende Sitzungen",
+    "past": "Vergangene Sitzungen",
+    "date": "am {0}",
+    "time": "ab {0} Uhr",
+    "requestedTopics": "Beantragte TOPs",
+    "addTopic": "+ TOP hinzufügen...",
+    "sendInvitation": "Einladung senden"
+  },
+  "preview": {
+    "more": "Mehr +",
+    "less": "Weniger -"
+  },
+  "overview": "Übersicht"
+}
