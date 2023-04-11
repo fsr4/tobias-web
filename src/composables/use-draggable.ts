@@ -2,22 +2,31 @@ import { Ref } from 'vue';
 import { Topic } from '@/models/Topic';
 import API from '@/utils/api-handler';
 
-type UseDraggable = {
-  drag: (event: DragEvent) => void,
+const DRAG_CONTENT_TYPE = 'application/vnd.topic-tool.topic-item';
+
+type UseDraggable = (event: DragEvent) => void;
+
+type UseDropArea = {
   dragOver: (event: DragEvent) => void,
   dragLeave: (event: DragEvent) => void,
-  drop: (event: DragEvent, callback: (() => void) | (() => Promise<void>)) => void
+  drop: (event: DragEvent) => void,
 };
 
-export default function useDraggable(topic?: Ref<Topic | undefined>): UseDraggable {
-  const drag = (event: DragEvent) => {
+export function useDraggable(topic: Ref<Topic>): UseDraggable {
+  return (event: DragEvent) => {
     if (!event.dataTransfer) return;
     event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', topic?.value?.id ?? '');
+    // use setData to work around WebKit bug preventing us from using `effectAllowed` on drop checking
+    event.dataTransfer.setData(DRAG_CONTENT_TYPE, '');
+    event.dataTransfer.setData('text/plain', topic.value.id);
   };
+}
 
+type InsertType = 'before' | 'child' | 'after';
+
+export function useDropArea(): UseDropArea {
   const dragOver = (event: DragEvent) => {
-    if (!event.dataTransfer) return;
+    if (!event.dataTransfer || !event.dataTransfer.types.includes(DRAG_CONTENT_TYPE)) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
 
@@ -30,7 +39,7 @@ export default function useDraggable(topic?: Ref<Topic | undefined>): UseDraggab
       target.classList.remove('insert-below');
       target.classList.remove('insert-sub');
       target.classList.add('insert-above');
-    } else if (y < 2 * offset && !target.dataset.parent) {
+    } else if (y < 2 * offset/* && !target.dataset.parent */) {
       target.classList.remove('insert-above');
       target.classList.remove('insert-below');
       target.classList.add('insert-sub');
@@ -42,7 +51,7 @@ export default function useDraggable(topic?: Ref<Topic | undefined>): UseDraggab
   };
 
   const dragLeave = (event: DragEvent) => {
-    if (!event.dataTransfer) return;
+    if (!event.dataTransfer || !event.dataTransfer.types.includes(DRAG_CONTENT_TYPE)) return;
     event.preventDefault();
     const target = event.currentTarget as HTMLElement;
 
@@ -51,8 +60,8 @@ export default function useDraggable(topic?: Ref<Topic | undefined>): UseDraggab
     target.classList.remove('insert-sub');
   };
 
-  const drop = async(event: DragEvent, callback: (() => void) | (() => Promise<void>)) => {
-    if (!event.target || !event.dataTransfer) return;
+  const drop = async(event: DragEvent) => {
+    if (!event.target || !event.dataTransfer || !event.dataTransfer.types.includes(DRAG_CONTENT_TYPE)) return;
     event.preventDefault();
 
     const target = event.currentTarget as HTMLElement;
@@ -61,51 +70,52 @@ export default function useDraggable(topic?: Ref<Topic | undefined>): UseDraggab
     const offset = targetPos.height / 3;
 
     const topicId = event.dataTransfer.getData('text/plain');
-    if (!target.dataset.position) return;
+    const targetTopicId = target.dataset.topic;
+    if (!targetTopicId) {
+      throw new Error(`Topic ${target} is missing data-topic attribute`);
+    }
 
-    const position = Number.parseInt(target.dataset.position);
-    let newPosition;
-    let newParent;
-
+    let insertType: InsertType;
     if (y < offset) {
-      // Insert above
       target.classList.remove('insert-above');
-      newPosition = position;
-      newParent = target.dataset.parent;
-    } else if (y < 2 * offset && !target.dataset.parent) {
-      // Insert as sub-topic
+      insertType = 'before';
+    } else if (y < 2 * offset/* && !target.dataset.parent */) {
       target.classList.remove('insert-sub');
-      newPosition = 1;
-      newParent = target.dataset.topic;
+      insertType = 'child';
     } else {
-      // Insert below
       target.classList.remove('insert-below');
-      newPosition = position + 1;
-      newParent = target.dataset.parent;
+      insertType = 'after';
     }
 
-    try {
-      const body: Record<string, unknown> = {
-        position: newPosition,
-        parent: newParent || null
-      };
-
-      console.log('req', body);
-      const response = await API.patch(`/topics/${topicId}`, body);
-      console.log(response);
-    } catch (e) {
-      console.error(e);
-    }
-
-    const result = callback();
-    if (result instanceof Promise)
-      await result;
+    await updateTopicOrder(topicId, targetTopicId, insertType);
   };
 
   return {
-    drag,
     dragOver,
     dragLeave,
-    drop
+    drop,
   };
+}
+
+async function updateTopicOrder(topicId: string, targetTopicId: string, insertType: InsertType) {
+  try {
+    let body: Record<string, string>;
+    switch (insertType) {
+      case 'before':
+        body = { insertBefore: targetTopicId };
+        break;
+      case 'child':
+        body = { parent: targetTopicId };
+        break;
+      case 'after':
+        body = { insertAfter: targetTopicId };
+        break;
+    }
+
+    console.log('req', body);
+    const response = await API.patch(`/topics/${topicId}`, body);
+    console.log(response);
+  } catch (e) {
+    console.error(e);
+  }
 }

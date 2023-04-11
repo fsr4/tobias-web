@@ -1,7 +1,7 @@
 <template>
   <router-link :to="{ name: ROUTE_MEETING_LIST }" class="back">
     <arrow-left/>
-    {{ t("overview") }}
+    {{ t('overview') }}
   </router-link>
   <div v-if="!meeting">
     <p>Loading...</p>
@@ -9,7 +9,7 @@
   <div v-else>
     <header>
       <div>
-        <h2>{{ t("meeting.meeting") }}</h2>
+        <h2>{{ t('meeting.meeting') }}</h2>
         <p>
           <calendar/>
           {{ t('meeting.date', [dateFormatter.format(meeting?.dateTime)]) }}
@@ -22,23 +22,23 @@
       <div>
         <button @click="sendInvitation">
           <mail/>
-          {{ t("meeting.sendInvitation") }}
+          {{ t('meeting.sendInvitation') }}
         </button>
       </div>
     </header>
     <div class="two-columns">
       <section>
-        <h3>{{ t("meeting.schedule") }}</h3>
+        <h3>{{ t('meeting.schedule') }}</h3>
         <topic-list :topics="topics" @deleteTopic="deleteTopic" @updateTopicOrder="reloadTopics"/>
       </section>
       <section>
-        <h3>{{ t("meeting.requestedTopics") }}</h3>
+        <h3>{{ t('meeting.requestedTopics') }}</h3>
         <ul>
           <li v-for="topic in unusedTopics" :key="topic.id">
             <topic-item :topic="topic" @deleteTopic="deleteTopic"/>
           </li>
           <li>
-            <topic-input :meeting-id="meeting?.id" @newTopic="addNewTopic"/>
+            <topic-input :meeting-id="meeting?.id ?? ''" @newTopic="addNewTopic"/>
           </li>
         </ul>
       </section>
@@ -66,23 +66,31 @@ import { ROUTE_MEETING_LIST } from '@/router';
 
 export default defineComponent({
   name: 'MeetingDetails',
-  components: { TopicInput, ArrowLeft, Calendar, Clock, Mail, TopicItem, TopicList },
+  components: {
+    TopicInput,
+    ArrowLeft,
+    Calendar,
+    Clock,
+    Mail,
+    TopicItem,
+    TopicList,
+  },
   data() {
     return {
-      ROUTE_MEETING_LIST
+      ROUTE_MEETING_LIST,
     };
   },
   methods: {
     addNewTopic(topic: Topic) {
       this.topics.push(topic);
     },
-    deleteTopic(topicId: string) {
+    async deleteTopic(topicId: string) {
       const topicIndex = this.topics.findIndex((t: Topic) => t.id === topicId);
       if (topicIndex === -1) {
         console.warn('Deleted topic does not exist in local topic list');
         return;
       }
-      this.topics.splice(topicIndex, 1);
+      await this.reloadTopics();
     },
     async reloadTopics() {
       await this.loadTopics();
@@ -93,14 +101,24 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       }
-    }
+    },
   },
   setup() {
-    const { t, locale } = useI18n();
+    const {
+      t,
+      locale,
+    } = useI18n();
     const route = useRoute();
-    const { meeting, topics, loadTopics } = useMeetingDetails(route.params.id as string);
+    const {
+      meeting,
+      topics,
+      loadTopics,
+    } = useMeetingDetails(route.params.id as string);
     const { unusedTopics } = useFilteredTopics(topics);
-    const { longDateFormatter, shortTimeFormatter } = useLocalizedDateFormatters(locale);
+    const {
+      longDateFormatter,
+      shortTimeFormatter,
+    } = useLocalizedDateFormatters(locale);
     return {
       t,
       meeting,
@@ -108,9 +126,9 @@ export default defineComponent({
       loadTopics,
       unusedTopics,
       dateFormatter: longDateFormatter,
-      timeFormatter: shortTimeFormatter
+      timeFormatter: shortTimeFormatter,
     };
-  }
+  },
 });
 </script>
 

@@ -17,6 +17,7 @@ module.exports = {
     'semi': ['error', 'always'],
     'object-curly-spacing': ['warn', 'always'],
     'space-before-function-paren': ['warn', 'never'],
-    'curly': 'off'
+    'curly': 'off',
+    'comma-dangle': ['warn', 'always-multiline'],
   }
 }

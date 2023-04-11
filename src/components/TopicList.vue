@@ -1,18 +1,21 @@
 <template>
   <ol>
-    <li v-for="topic in mainTopics" :key="topic.id">
-      <topic-item :topic="topic"
-                  @deleteTopic="deleteTopic"
-                  @drop="updateTopicOrder"
-                  @dragover="dragOver"
-                  @dragleave="dragLeave"
+    <li v-for="(topic, index) in mainTopics" :key="topic.id">
+      <topic-item
+        :topic="topic"
+        :position="(index + 1).toString()"
+        @deleteTopic="deleteTopic"
+        @drop="updateTopicOrder"
+        @dragover="dragOver"
+        @dragleave="dragLeave"
       />
-      <topic-sub-list v-if="getSubTopics(topic.id).length > 0"
-                      :topics="topics"
-                      :topic-id="topic.id"
-                      :level="1"
-                      @deleteTopic="deleteTopic"
-                      @updateTopicOrder="updateTopicOrder"
+      <topic-sub-list
+        v-if="getSubTopics(topic.id).length > 0"
+        :topics="topics"
+        :topic-id="topic.id"
+        :prefix="(index + 1).toString()"
+        @deleteTopic="deleteTopic"
+        @updateTopicOrder="updateTopicOrder"
       />
     </li>
   </ol>
@@ -23,14 +26,20 @@ import { defineComponent, PropType, toRefs } from 'vue';
 import TopicItem from '@/components/TopicItem.vue';
 import useFilteredTopics from '@/composables/use-filtered-topics';
 import { Topic } from '@/models/Topic';
-import useDraggable from '@/composables/use-draggable';
+import { useDropArea } from '@/composables/use-draggable';
 import TopicSubList from '@/components/TopicSubList.vue';
 
 export default defineComponent({
   name: 'TopicList',
-  components: { TopicSubList, TopicItem },
+  components: {
+    TopicSubList,
+    TopicItem,
+  },
   props: {
-    topics: Array as PropType<Topic[]>
+    topics: {
+      type: Array as PropType<Topic[]>,
+      required: true,
+    },
   },
   emits: ['deleteTopic', 'updateTopicOrder'],
   methods: {
@@ -39,21 +48,29 @@ export default defineComponent({
       this.$emit('deleteTopic', topicId);
     },
     async updateTopicOrder(dropEvent: DragEvent) {
-      await this.drop(dropEvent, () => this.$emit('updateTopicOrder'));
-    }
+      await this.drop(dropEvent);
+      this.$emit('updateTopicOrder');
+    },
   },
   setup(props) {
     const { topics } = toRefs(props);
-    const { mainTopics, getSubTopics } = useFilteredTopics(topics);
-    const { dragOver, dragLeave, drop } = useDraggable();
+    const {
+      mainTopics,
+      getSubTopics,
+    } = useFilteredTopics(topics);
+    const {
+      dragOver,
+      dragLeave,
+      drop,
+    } = useDropArea();
     return {
       mainTopics,
       getSubTopics,
       dragOver,
       dragLeave,
-      drop
+      drop,
     };
-  }
+  },
 });
 </script>
 

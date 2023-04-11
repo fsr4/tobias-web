@@ -1,21 +1,29 @@
 export class Topic {
   public readonly id: string;
   public readonly title: string;
-  public readonly position: number | null;
   public readonly parent: string | null;
-  public readonly fullPosition: string;
+  public readonly previous: string | null;
+  public readonly next: string | null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  public static parseFromData(data: any): Topic {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static parseFromData(data: Record<string, any>): Topic {
     const parent = data.parent?._id ? data.parent._id : data.parent;
-    return new Topic(data._id, data.name, data.position, parent, data.fullPosition);
+    const previous = data.previous?._id ? data.previous._id : data.previous;
+    const next = data.next?._id ? data.next._id : data.next;
+    return new Topic(data._id, data.name, parent, previous, next);
   }
 
-  constructor(id: string, title: string, position: number | undefined, parent: string | undefined, fullPosition: string) {
+  constructor(
+    id: string,
+    title: string,
+    parent: string | undefined,
+    previous: string | undefined,
+    next: string | undefined,
+  ) {
     this.id = id;
     this.title = title;
-    this.position = position ?? null;
     this.parent = parent ?? null;
-    this.fullPosition = fullPosition;
+    this.previous = previous ?? null;
+    this.next = next ?? null;
   }
 }

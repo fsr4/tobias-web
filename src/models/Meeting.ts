@@ -2,8 +2,8 @@ export class Meeting {
   public readonly id: string;
   public readonly dateTime: Date;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
-  public static parseFromData(data: any): Meeting {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static parseFromData(data: Record<string, any>): Meeting {
     return new Meeting(data._id, new Date(data.dateTime));
   }
 

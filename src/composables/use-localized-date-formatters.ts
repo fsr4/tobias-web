@@ -8,7 +8,10 @@ type UseLocalizedDateFormatter = {
 
 export default function useLocalizedDateFormatters(locale: WritableComputedRef<string>): UseLocalizedDateFormatter {
   const longDateTimeFormatter = computed(() =>
-    new Intl.DateTimeFormat(locale.value, { dateStyle: 'long', timeStyle: 'short' }));
+    new Intl.DateTimeFormat(locale.value, {
+      dateStyle: 'long',
+      timeStyle: 'short',
+    }));
 
   const longDateFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }));
 
@@ -17,6 +20,6 @@ export default function useLocalizedDateFormatters(locale: WritableComputedRef<s
   return {
     longDateTimeFormatter,
     longDateFormatter,
-    shortTimeFormatter
+    shortTimeFormatter,
   };
 }

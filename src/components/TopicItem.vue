@@ -1,15 +1,7 @@
 <template>
-  <div draggable="true"
-       @dragstart="drag"
-       :data-topic="topic.id"
-       :data-position="topic.position"
-       :data-parent="topic.parent"
-  >
-    <p v-if="topic.parent">
-      {{ topic.fullPosition }} {{ topic.title }}
-    </p>
-    <p v-else-if="topic.position">
-      {{ topic.fullPosition }} {{ topic.title }}
+  <div draggable="true" @dragstart="drag" :data-topic="topic.id">
+    <p v-if="topic.parent || topic.previous || topic.next">
+      {{ position }} {{ topic.title }}
     </p>
     <p v-else>
       {{ topic.title }}
@@ -23,7 +15,7 @@
 <script lang="ts">
 import { defineComponent, PropType, toRefs } from 'vue';
 import { Topic } from '@/models/Topic';
-import useDraggable from '@/composables/use-draggable';
+import { useDraggable } from '@/composables/use-draggable';
 import Cross from 'bootstrap-icons/icons/x.svg';
 import useTopicAPI from '@/composables/use-topic-api';
 
@@ -31,13 +23,20 @@ export default defineComponent({
   name: 'TopicItem',
   components: { Cross },
   props: {
-    topic: Object as PropType<Topic>
+    topic: {
+      type: Object as PropType<Topic>,
+      required: true,
+    },
+    position: {
+      type: String,
+    },
   },
   emits: ['deleteTopic'],
   methods: {
     async remove() {
-      if (!this.topic)
+      if (!this.topic) {
         return;
+      }
 
       try {
         await this.deleteTopic(this.topic.id);
@@ -45,19 +44,19 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       }
-    }
+    },
   },
   setup(props) {
     const { topic } = toRefs(props);
 
-    const { drag } = useDraggable(topic);
+    const drag = useDraggable(topic);
     const { deleteTopic } = useTopicAPI();
 
     return {
       drag,
-      deleteTopic
+      deleteTopic,
     };
-  }
+  },
 });
 </script>
 
