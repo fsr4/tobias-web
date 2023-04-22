@@ -3,7 +3,7 @@
     <div :class="expanded ? 'expanded' : 'contracted'">
       <slot/>
     </div>
-    <button @click="toggle">{{ expanded ? t("preview.less") : t("preview.more") }}</button>
+    <button @click="toggle">{{ expanded ? t('preview.less') : t('preview.more') }}</button>
   </div>
 </template>
 
@@ -12,35 +12,38 @@ import { defineComponent, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
-  name: 'Preview',
+  name: 'ExpandablePreview',
   props: {
     previewSize: {
-      type: String as PropType<'small' | 'big'>,
-      default: 'small'
-    }
+      type: String as PropType<'small' | 'large'>,
+      default: 'small',
+    },
   },
   emits: {
     expand: () => true,
-    contract: () => true
+    contract: () => true,
   },
   data() {
     return {
-      expanded: false
+      expanded: false,
     };
   },
   methods: {
     toggle() {
       this.expanded = !this.expanded;
-      if (this.expanded) this.$emit('expand');
-      else this.$emit('contract');
-    }
+      if (this.expanded) {
+        this.$emit('expand');
+      } else {
+        this.$emit('contract');
+      }
+    },
   },
   setup() {
     const { t } = useI18n();
     return {
-      t
+      t,
     };
-  }
+  },
 });
 </script>
 
@@ -92,6 +95,8 @@ button {
 .contracted {
   overflow: hidden;
 
+  $fadeOutColor: $color-light;
+
   &::after {
     content: "";
     position: absolute;
@@ -99,13 +104,13 @@ button {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(rgba($color-light, 0), rgba($color-light, 1));
+    background: linear-gradient(rgba($fadeOutColor, 0), rgba($fadeOutColor, 1) 90%);
   }
 }
 
 @media screen and (prefers-color-scheme: dark) {
-  .contracted::after {
-    background: linear-gradient(rgba($color-dark, 0), rgba($color-dark, 1));
+  .contracted {
+    $fadeOutColor: $color-dark;
   }
 }
 </style>

@@ -10,7 +10,7 @@ type UseFilteredTopics = {
 export default function useFilteredTopics(topics: Ref<Topic[] | undefined>): UseFilteredTopics {
   const mainTopics = computed(() => {
     if (!topics.value) return [];
-    const mainTopics = topics.value.filter(t => !t.parent && (t.previous || t.next));
+    const mainTopics = topics.value.filter(t => !t.parentTopic && (t.previous || t.next));
     const firstTopic = mainTopics.filter(t => !t.previous)[0];
     if (!firstTopic) return [];
     return sortTopics(firstTopic, mainTopics);
@@ -18,12 +18,12 @@ export default function useFilteredTopics(topics: Ref<Topic[] | undefined>): Use
 
   const unusedTopics = computed((): Topic[] => {
     if (!topics.value) return [];
-    return topics.value.filter(t => !t.parent && !t.previous && !t.next);
+    return topics.value.filter(t => !t.parentTopic && !t.previous && !t.next);
   });
 
   const getSubTopics = (parent: string): Topic[] => {
     if (!topics.value) return [];
-    const subTopics = topics.value.filter(t => t.parent === parent);
+    const subTopics = topics.value.filter(t => t.parentTopic === parent);
     if (parent === '6435bbf4c1698c3a433de6d5') console.log(subTopics);
     const firstTopic = subTopics.filter(t => !t.previous)[0];
     if (!firstTopic) return [];

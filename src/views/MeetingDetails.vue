@@ -29,13 +29,13 @@
     <div class="two-columns">
       <section>
         <h3>{{ t('meeting.schedule') }}</h3>
-        <topic-list :topics="topics" @deleteTopic="deleteTopic" @updateTopicOrder="reloadTopics"/>
+        <topic-list :topics="topics" @updateTopics="reloadTopics"/>
       </section>
       <section>
         <h3>{{ t('meeting.requestedTopics') }}</h3>
         <ul>
           <li v-for="topic in unusedTopics" :key="topic.id">
-            <topic-item :topic="topic" @deleteTopic="deleteTopic"/>
+            <topic-item :topic="topic" @deleteTopic="reloadTopics"/>
           </li>
           <li>
             <topic-input :meeting-id="meeting?.id ?? ''" @newTopic="addNewTopic"/>
@@ -84,16 +84,8 @@ export default defineComponent({
     addNewTopic(topic: Topic) {
       this.topics.push(topic);
     },
-    async deleteTopic(topicId: string) {
-      const topicIndex = this.topics.findIndex((t: Topic) => t.id === topicId);
-      if (topicIndex === -1) {
-        console.warn('Deleted topic does not exist in local topic list');
-        return;
-      }
-      await this.reloadTopics();
-    },
     async reloadTopics() {
-      await this.loadTopics();
+      await this.loadMeeting();
     },
     async sendInvitation() {
       try {
@@ -112,7 +104,7 @@ export default defineComponent({
     const {
       meeting,
       topics,
-      loadTopics,
+      loadMeeting,
     } = useMeetingDetails(route.params.id as string);
     const { unusedTopics } = useFilteredTopics(topics);
     const {
@@ -123,7 +115,7 @@ export default defineComponent({
       t,
       meeting,
       topics,
-      loadTopics,
+      loadMeeting,
       unusedTopics,
       dateFormatter: longDateFormatter,
       timeFormatter: shortTimeFormatter,

@@ -29,6 +29,6 @@ export default function useFilteredMeetingLists(meetings: Ref<UnwrapRef<Meeting[
   return {
     nextMeeting,
     upcomingMeetings,
-    pastMeetings
+    pastMeetings,
   };
 }

@@ -21,21 +21,23 @@ import { useI18n } from 'vue-i18n';
 import useMeetingList from '@/composables/use-meeting-list';
 import useFilteredMeetingLists from '@/composables/use-filtered-meeting-lists';
 import API from '@/utils/api-handler';
+import { Meeting } from '@/models/Meeting.ts';
 
 export default defineComponent({
   components: {
     MeetingList,
-    MeetingItem
+    MeetingItem,
   },
   methods: {
     addMeeting: async() => {
       try {
-        const meeting = await API.post('/meetings', { dateTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000) });
-        await API.post('/topics/default?meeting=' + meeting._id);
+        const responseData = await API.post('/meetings', { dateTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000) });
+        const meeting = Meeting.parseFromData(responseData);
+        await API.post('/topics/default?meeting=' + meeting.id);
       } catch (e) {
         console.error(e);
       }
-    }
+    },
   },
   setup() {
     const { t } = useI18n();
@@ -43,7 +45,7 @@ export default defineComponent({
     const {
       nextMeeting,
       upcomingMeetings,
-      pastMeetings
+      pastMeetings,
     } = useFilteredMeetingLists(meetings);
 
     return {
@@ -51,9 +53,9 @@ export default defineComponent({
       meetings,
       nextMeeting,
       upcomingMeetings,
-      pastMeetings
+      pastMeetings,
     };
-  }
+  },
 });
 </script>
 

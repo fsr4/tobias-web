@@ -1,6 +1,6 @@
 import { Ref } from 'vue';
 import { Topic } from '@/models/Topic';
-import API from '@/utils/api-handler';
+import useTopicAPI, { InsertType } from '@/composables/use-topic-api.ts';
 
 const DRAG_CONTENT_TYPE = 'application/vnd.topic-tool.topic-item';
 
@@ -22,8 +22,6 @@ export function useDraggable(topic: Ref<Topic>): UseDraggable {
   };
 }
 
-type InsertType = 'before' | 'child' | 'after';
-
 export function useDropArea(): UseDropArea {
   const dragOver = (event: DragEvent) => {
     if (!event.dataTransfer || !event.dataTransfer.types.includes(DRAG_CONTENT_TYPE)) return;
@@ -31,6 +29,12 @@ export function useDropArea(): UseDropArea {
     event.dataTransfer.dropEffect = 'move';
 
     const target = event.currentTarget as HTMLElement;
+
+    const topicId = event.dataTransfer.getData('text/plain');
+    const targetTopicId = target.dataset.topic;
+    // Disallow interacting with self
+    if (topicId === targetTopicId) return;
+
     const targetPos = target.getBoundingClientRect();
     const y = event.y - targetPos.y;
     const offset = targetPos.height / 3;
@@ -75,6 +79,9 @@ export function useDropArea(): UseDropArea {
       throw new Error(`Topic ${target} is missing data-topic attribute`);
     }
 
+    // Disallow interacting with self
+    if (topicId === targetTopicId) return;
+
     let insertType: InsertType;
     if (y < offset) {
       target.classList.remove('insert-above');
@@ -86,8 +93,12 @@ export function useDropArea(): UseDropArea {
       target.classList.remove('insert-below');
       insertType = 'after';
     }
-
-    await updateTopicOrder(topicId, targetTopicId, insertType);
+    
+    try {
+      await useTopicAPI().updateTopicOrder(topicId, targetTopicId, insertType);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return {
@@ -97,25 +108,4 @@ export function useDropArea(): UseDropArea {
   };
 }
 
-async function updateTopicOrder(topicId: string, targetTopicId: string, insertType: InsertType) {
-  try {
-    let body: Record<string, string>;
-    switch (insertType) {
-      case 'before':
-        body = { insertBefore: targetTopicId };
-        break;
-      case 'child':
-        body = { parent: targetTopicId };
-        break;
-      case 'after':
-        body = { insertAfter: targetTopicId };
-        break;
-    }
 
-    console.log('req', body);
-    const response = await API.patch(`/topics/${topicId}`, body);
-    console.log(response);
-  } catch (e) {
-    console.error(e);
-  }
-}

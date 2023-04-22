@@ -41,15 +41,14 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['deleteTopic', 'updateTopicOrder'],
+  emits: ['updateTopics'],
   methods: {
-    deleteTopic(topicId: string) {
-      // TODO: Refresh on deletion
-      this.$emit('deleteTopic', topicId);
+    deleteTopic() {
+      this.$emit('updateTopics');
     },
     async updateTopicOrder(dropEvent: DragEvent) {
       await this.drop(dropEvent);
-      this.$emit('updateTopicOrder');
+      this.$emit('updateTopics');
     },
   },
   setup(props) {

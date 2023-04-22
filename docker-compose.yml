@@ -8,4 +8,4 @@ services:
     ports:
       - "3001:80"
     environment:
-      - VUE_APP_API_HOST=${VUE_APP_API_HOST}
+      - VITE_API_HOST=${VITE_API_HOST}

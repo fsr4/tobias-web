@@ -1,6 +1,6 @@
 <template>
   <div draggable="true" @dragstart="drag" :data-topic="topic.id">
-    <p v-if="topic.parent || topic.previous || topic.next">
+    <p v-if="isScheduled">
       {{ position }} {{ topic.title }}
     </p>
     <p v-else>
@@ -32,15 +32,29 @@ export default defineComponent({
     },
   },
   emits: ['deleteTopic'],
+  computed: {
+    isScheduled(): boolean {
+      return !!(this.topic.parentTopic || this.topic.previous || this.topic.next);
+    },
+  },
   methods: {
     async remove() {
       if (!this.topic) {
         return;
       }
 
+      if (this.isScheduled) {
+        try {
+          await this.removeTopicFromSchedule(this.topic.id);
+          this.$emit('deleteTopic');
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       try {
         await this.deleteTopic(this.topic.id);
-        this.$emit('deleteTopic', this.topic.id);
+        this.$emit('deleteTopic');
       } catch (e) {
         console.error(e);
       }
@@ -50,10 +64,14 @@ export default defineComponent({
     const { topic } = toRefs(props);
 
     const drag = useDraggable(topic);
-    const { deleteTopic } = useTopicAPI();
+    const {
+      removeTopicFromSchedule,
+      deleteTopic,
+    } = useTopicAPI();
 
     return {
       drag,
+      removeTopicFromSchedule,
       deleteTopic,
     };
   },

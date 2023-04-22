@@ -13,14 +13,15 @@ export default defineComponent({
   props: {
     meetingId: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   emits: ['newTopic'],
   methods: {
     async checkSubmit(event: KeyboardEvent) {
-      if (event.key !== 'Enter')
+      if (event.key !== 'Enter') {
         return;
+      }
 
       const input = event.target as HTMLInputElement;
       try {
@@ -30,7 +31,7 @@ export default defineComponent({
         console.error(e);
       }
       input.value = '';
-    }
+    },
   },
   setup() {
     const { t } = useI18n();
@@ -38,9 +39,9 @@ export default defineComponent({
 
     return {
       t,
-      addTopic
+      addTopic,
     };
-  }
+  },
 });
 </script>
 

@@ -24,24 +24,36 @@ import Clock from 'bootstrap-icons/icons/clock.svg';
 
 export default defineComponent({
   name: 'MeetingItem',
-  components: { Calendar, Clock },
+  components: {
+    Calendar,
+    Clock,
+  },
   props: {
-    meeting: Meeting
+    meeting: {
+      type: Meeting,
+      required: true,
+    },
   },
   data() {
     return {
-      ROUTE_MEETING_DETAILS
+      ROUTE_MEETING_DETAILS,
     };
   },
   setup() {
-    const { t, locale } = useI18n();
-    const { longDateFormatter, shortTimeFormatter } = useLocalizedDateFormatters(locale);
+    const {
+      t,
+      locale,
+    } = useI18n();
+    const {
+      longDateFormatter,
+      shortTimeFormatter,
+    } = useLocalizedDateFormatters(locale);
     return {
       t,
       dateFormatter: longDateFormatter,
-      timeFormatter: shortTimeFormatter
+      timeFormatter: shortTimeFormatter,
     };
-  }
+  },
 });
 </script>
 
@@ -55,7 +67,7 @@ a {
 
 .container {
   padding: 0.2em 1em;
-  border: 1px solid var(--color-offset);
+  border: 1px solid $color-offset;
 
   &:hover {
     background-color: rgba($color-dark, 0.07);

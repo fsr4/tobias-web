@@ -6,37 +6,46 @@
         <meeting-item :meeting="meeting"/>
       </li>
     </ul>
-    <preview v-else preview-size="big" @expand="scrollTo(id)">
+    <expandable-preview v-else preview-size="large" @expand="scrollTo(id)">
       <ul>
         <li v-for="meeting in meetings" :key="meeting.id">
           <meeting-item :meeting="meeting"/>
         </li>
       </ul>
-    </preview>
+    </expandable-preview>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import MeetingItem from '@/components/MeetingItem.vue';
-import Preview from '@/components/Preview.vue';
+import ExpandablePreview from '@/components/ExpandablePreview.vue';
 import { Meeting } from '@/models/Meeting';
 
 export default defineComponent({
   components: {
-    Preview,
-    MeetingItem
+    ExpandablePreview,
+    MeetingItem,
   },
   props: {
-    id: String,
-    title: String,
-    meetings: Array as PropType<Meeting[]>
+    id: {
+      type: String,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    meetings: {
+      type: Array as PropType<Meeting[]>,
+      required: true,
+    },
   },
   methods: {
     scrollTo: (anchor: string) => {
       location.hash = '#' + anchor;
-    }
-  }
+    },
+  },
 });
 </script>
 

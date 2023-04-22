@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN apk add git && npm install
 COPY ./ ./
 EXPOSE 8080
-ENTRYPOINT ["npm", "run", "serve"]
+ENTRYPOINT ["npm", "run", "dev"]
 
 FROM node:gallium-alpine as build
 WORKDIR /build

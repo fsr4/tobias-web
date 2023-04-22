@@ -25,6 +25,6 @@ export default function useMeetingList(): UseMeetingListType {
 
   return {
     meetings,
-    loadMeetings
+    loadMeetings,
   };
 }

@@ -1,5 +1,9 @@
 $color-light: #f2f2f2;
 $color-dark: #252223;
 
+$color-light-secondary: #dadada;
+$color-dark-secondary: #3d3a3b;
+
 $color-main: $color-dark !default;
 $color-background: $color-light !default;
+$color-offset: $color-light-secondary !default;

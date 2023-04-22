@@ -1,13 +1,14 @@
 type HTTPMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 export class APIHandler {
-  public readonly baseURL = process.env.VUE_APP_API_HOST;
+  public readonly baseURL = import.meta.env.VITE_API_HOST;
 
   private static instance: APIHandler;
 
   public static getInstance(): APIHandler {
-    if (!this.instance)
+    if (!this.instance) {
       this.instance = new this();
+    }
 
     return this.instance;
   }
@@ -17,8 +18,9 @@ export class APIHandler {
     const query = this.buildQuery(queryParameters);
 
     const response = await this.fetch('GET', path + query);
-    if (!response.ok)
+    if (!response.ok) {
       throw await response.json();
+    }
 
     return response.json();
   }
@@ -28,11 +30,13 @@ export class APIHandler {
     const query = this.buildQuery(queryParameters);
 
     const response = await this.fetch('POST', path + query, body);
-    if (!response.ok)
+    if (!response.ok) {
       throw await response.json();
+    }
 
-    if (response.status === 204)
+    if (response.status === 204) {
       return;
+    }
 
     return response.json();
   }
@@ -42,11 +46,13 @@ export class APIHandler {
     const query = this.buildQuery(queryParameters);
 
     const response = await this.fetch('PATCH', path + query, body);
-    if (!response.ok)
+    if (!response.ok) {
       throw await response.json();
+    }
 
-    if (response.status === 204)
+    if (response.status === 204) {
       return;
+    }
 
     return response.json();
   }
@@ -54,18 +60,21 @@ export class APIHandler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async del(path: string): Promise<any> {
     const response = await this.fetch('DELETE', path);
-    if (!response.ok)
+    if (!response.ok) {
       throw await response.json();
+    }
 
-    if (response.status === 204)
+    if (response.status === 204) {
       return;
+    }
 
     return response.json();
   }
 
   private buildQuery(queryParameters?: Record<string, unknown>): string {
-    if (!queryParameters)
+    if (!queryParameters) {
       return '';
+    }
     return '?' + Object.keys(queryParameters)
       .map(key => key + '=' + queryParameters[key])
       .join('&');
@@ -75,8 +84,8 @@ export class APIHandler {
     const request: RequestInit = {
       method: method,
       headers: [
-        ['Accept', 'application/json']
-      ]
+        ['Accept', 'application/json'],
+      ],
     };
     if (body) {
       request.body = JSON.stringify(body);
